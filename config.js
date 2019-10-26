@@ -1,10 +1,10 @@
 require('dotenv').config()
 
 const config = {
-  consumer_key: process.env.TWITTER_CONSUMER_KEY,
-  consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
-  access_token_key: process.env.TWITTER_ACCESS_TOKEN_KEY,
-  access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET
+  consumer_key: "Nms8OIgZwnKCv10MxRHBcegL4",
+  consumer_secret: "btnjOztU4jxr91eJQrcCwo98rXe8qzUFtwMX624SDUjP6TqMRk",
+  access_token_key: "73528077-zuqEhHCvzUTwnm19Bd4xPz9LwSzJqHmoXm7L2ZEij",
+  access_token_secret: "KHdqFJzg5SdKZTbq5Lzr6vzuIL5gz6NbcOmbJ4sVDtvTl"
 }
 
 module.exports = config
