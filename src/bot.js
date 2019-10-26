@@ -4,8 +4,8 @@ const config = require("./config")
 const client = new Twitter(config);
 
 likeBot();
-//10 minutes
-setInterval(likeBot, 600000);
+// 25minutes
+setInterval(likeBot, 1500000);
 
 function likeBot() {
 
@@ -20,7 +20,7 @@ function likeBot() {
       if(!error) {
     
         const tweets = data.statuses
-        
+
         tryToFavoriteTweets(tweets)
     
       } else {
@@ -32,6 +32,7 @@ function likeBot() {
     function getParams() {
       const params = {
         q: '#100daysofcode',
+        count: 100,
         result_type: 'recent'
       }
       return params
