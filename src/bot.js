@@ -4,8 +4,8 @@ const config = require("./config")
 const client = new Twitter(config);
 
 likeBot();
-// 25 minutes
-setInterval(likeBot, 1500000 );
+//10 minutes
+setInterval(likeBot, 600000);
 
 function likeBot() {
 
