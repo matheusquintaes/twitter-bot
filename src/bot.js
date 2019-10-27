@@ -21,7 +21,7 @@ function likeBot() {
     
         const tweets = data.statuses
 
-        tryToFavoriteTweets(tweets)
+        tryToFavorite(tweets)
     
       } else {
         console.log(error) 
@@ -39,7 +39,7 @@ function likeBot() {
     }
   }
 
-  function tryToFavoriteTweets(tweets) {
+  function tryToFavorite(tweets) {
 
     for (let i = 0; i < tweets.length; i++) {
   
