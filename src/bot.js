@@ -15,7 +15,7 @@ function likeBot() {
 
   function searchTweetsForLike () {
 
-    client.get('search/tweets', getParams(), function(error, data, response) {
+    client.get('search/tweets', getParams(), function(error, data) {
     
       if(!error) {
     
@@ -32,7 +32,6 @@ function likeBot() {
     function getParams() {
       const params = {
         q: '#100daysofcode',
-        count: 100,
         result_type: 'recent'
       }
       return params
