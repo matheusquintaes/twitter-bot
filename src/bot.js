@@ -1,6 +1,6 @@
 const Twitter = require('twitter')
 const config = require("./config")
-
+const fs = require('fs');
 const client = new Twitter(config);
 
 likeBot();
@@ -31,7 +31,7 @@ function likeBot() {
         const tweets = data.statuses
 
         const sanitizedTweets = filtersTheGoodOnes(tweets)
-   
+
         sanitizedTweets ? tryToFavorite(sanitizedTweets) : console.log("no good tweet found 😢")
 
       } else {
@@ -45,15 +45,17 @@ function likeBot() {
   function filtersTheGoodOnes(tweets) {
     
     const arrayOfTweets = Array.from(tweets)
-      
+
     const regexIsRetweet = /^RT/;
     
     const regexContainsDay = /(day[0-9]+)|(day [0-9])|(D [0-9])|(D[0-9])|(today)|(day-[0-9]+)|([0-9]+\/[0-9]+)/gi
 
     const sanitizedTweets = arrayOfTweets.filter((tweet) => {
 
-      return !regexIsRetweet.test(tweet.text) && regexContainsDay.test(tweet.text)
-    
+      return !regexIsRetweet.test(tweet.text) && 
+              regexContainsDay.test(tweet.text) && 
+              tweet.entities.hashtags.length <= 5 &&
+              tweet.lang  === 'en'
     })
 
     return sanitizedTweets
@@ -85,4 +87,15 @@ function likeBot() {
     }
   }
   
+}
+
+function saveFileTodebug(data) {
+  fs.writeFile("debug.txt", JSON.stringify(data), function(err) {
+
+    if(err) {
+        return console.log(err);
+    }
+
+    console.log("The file was saved!");
+  }); 
 }
