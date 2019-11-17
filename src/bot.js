@@ -4,8 +4,8 @@ const config = require("./config")
 const client = new Twitter(config);
 
 likeBot();
-// 25minutes
-setInterval(likeBot, 1500000);
+//10minutes
+setInterval(likeBot, 600000);
 
 function likeBot() {
 
@@ -13,6 +13,15 @@ function likeBot() {
 
   searchTweetsForLike()
 
+  function getParams() {
+    const params = {
+      q: '#100daysofcode',
+      result_type: 'recent',
+      count: 70
+    }
+    return params
+  }
+  
   function searchTweetsForLike () {
 
     client.get('search/tweets', getParams(), function(error, data) {
@@ -21,21 +30,33 @@ function likeBot() {
     
         const tweets = data.statuses
 
-        tryToFavorite(tweets)
-    
+        const sanitizedTweets = filtersTheGoodOnes(tweets)
+   
+        sanitizedTweets ? tryToFavorite(sanitizedTweets) : console.log("no good tweet found 😢")
+
       } else {
         console.log(error) 
       }
     
     })
+   
+  }
+
+  function filtersTheGoodOnes(tweets) {
     
-    function getParams() {
-      const params = {
-        q: '#100daysofcode',
-        result_type: 'recent'
-      }
-      return params
-    }
+    const arrayOfTweets = Array.from(tweets)
+      
+    const regexIsRetweet = /^RT/;
+    
+    const regexContainsDay = /(day[0-9]+)|(day [0-9])|(D [0-9])|(D[0-9])|(today)|(day-[0-9]+)|([0-9]+\/[0-9]+)/gi
+
+    const sanitizedTweets = arrayOfTweets.filter((tweet) => {
+
+      return !regexIsRetweet.test(tweet.text) && regexContainsDay.test(tweet.text)
+    
+    })
+
+    return sanitizedTweets
   }
 
   function tryToFavorite(tweets) {
