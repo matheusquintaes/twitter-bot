@@ -4,8 +4,8 @@ const fs = require('fs');
 const client = new Twitter(config);
 
 likeBot();
-//10minutes
-setInterval(likeBot, 600000);
+//30minutes
+setInterval(likeBot, 1800000);
 
 function likeBot() {
 
@@ -17,7 +17,7 @@ function likeBot() {
     const params = {
       q: '#100daysofcode',
       result_type: 'recent',
-      count: 70
+      count: 100
     }
     return params
   }
