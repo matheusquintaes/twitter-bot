@@ -4,9 +4,10 @@ const fs = require('fs');
 const client = new Twitter(config);
 
 
-const frequencyLikeInMinutes = 30
-//30minutes
+const frequencyLikeInMinutes = 60 //30minutes
+
 setInterval(likeBot, 1000 * 60 * frequencyLikeInMinutes);
+
 function getParams() {
   const params = {
     q: '(%23100DaysOfCode)%20-filter%3Areplies',
