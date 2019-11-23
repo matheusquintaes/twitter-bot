@@ -3,91 +3,115 @@ const config = require("./config")
 const fs = require('fs');
 const client = new Twitter(config);
 
-likeBot();
+
+const frequencyLikeInMinutes = 30
 //30minutes
-setInterval(likeBot, 1800000);
+// setInterval(likeBot, 1000 * 60 * frequencyLikeInMinutes);
+function getParams() {
+  const params = {
+    q: '(%23100DaysOfCode)%20-filter%3Areplies',
+    result_type: 'recent',
+    count: 100
+  }
+  return params
+}
+
+likeBot();
 
 function likeBot() {
-
-  console.log('Bot started')
-
-  searchTweetsForLike()
-
-  function getParams() {
-    const params = {
-      q: '#100daysofcode',
-      result_type: 'recent',
-      count: 100
-    }
-    return params
-  }
   
-  function searchTweetsForLike () {
+  console.log('--- Bot started --- \n')
 
-    client.get('search/tweets', getParams(), function(error, data) {
-    
+  verifyRateLimit()
+
+  function verifyRateLimit() {
+  
+    client.get('application/rate_limit_status', function(error, data) {
+      
       if(!error) {
+      
+        const remaining = data.resources.search['/search/tweets'].remaining;
+
+        if(remaining > 10) {
+
+          searchTweetsForLike()
+
+        } else {
+          console.log('erro: rate_limit_status')
+        }
+      }
+  
+    })
+  }
+
+  
+function searchTweetsForLike () {
+
+  client.get('search/tweets', getParams(), function(error, data) {
+  
+    if(!error) {
+  
+      const tweets = data.statuses
+
+      const sanitizedTweets = filtersTheGoodOnes(tweets)
+
+      sanitizedTweets ? tryToFavorite(sanitizedTweets) : console.log("no good tweet found 😢")
+
+    } else {
+      console.log(error) 
+    }
+  
+  })
+ 
+}
+
+function filtersTheGoodOnes(tweets) {
+  
+  const arrayOfTweets = Array.from(tweets)
+
+  const containsRestrictedWords = /^((?!free|coupons|coupon).)*$/gim;
+  
+  const containsDay = /(day\d{1,2})|(day \d{1,2})|(D \d{1,2})|(D-\d{1,2})|(day-\d{1,2})|(\d{1,2}\/100+)/gim
+
+  const sanitizedTweets = arrayOfTweets.filter((tweet) => {
     
-        const tweets = data.statuses
+    return  !tweet.retweeted_status && 
+            !containsRestrictedWords.test(tweet.text) && 
+            containsDay.test(tweet.text) && 
+            tweet.entities.hashtags.length <= 5 
+  })
 
-        const sanitizedTweets = filtersTheGoodOnes(tweets)
+  return sanitizedTweets
+}
 
-        sanitizedTweets ? tryToFavorite(sanitizedTweets) : console.log("no good tweet found 😢")
+function tryToFavorite(tweets) {
 
+  for (let i = 0; i < tweets.length; i++) {
+
+    let tweetId = { id: tweets[i].id_str }
+    
+    client.post('favorites/create', tweetId, function (error, response) {
+      if (!error) {
+        
+        let username = response.user.screen_name;
+        let tweetIdString = response.id_str;
+
+        showFavoriteTweet(username,tweetIdString)
+        
       } else {
         console.log(error) 
       }
-    
     })
    
   }
 
-  function filtersTheGoodOnes(tweets) {
-    
-    const arrayOfTweets = Array.from(tweets)
-
-    const regexIsRetweet = /^RT/;
-    
-    const regexContainsDay = /(day[0-9]+)|(day [0-9])|(D [0-9])|(D[0-9])|(today)|(day-[0-9]+)|([0-9]+\/[0-9]+)/gi
-
-    const sanitizedTweets = arrayOfTweets.filter((tweet) => {
-
-      return !regexIsRetweet.test(tweet.text) && 
-              regexContainsDay.test(tweet.text) && 
-              tweet.entities.hashtags.length <= 5 &&
-              tweet.lang  === 'en'
-    })
-
-    return sanitizedTweets
+  function showFavoriteTweet(username, tweetIdString){
+    return console.log('Favorited: ', `https://twitter.com/${username}/status/${tweetIdString}`)
   }
-
-  function tryToFavorite(tweets) {
-
-    for (let i = 0; i < tweets.length; i++) {
-  
-      let tweetId = { id: tweets[i].id_str }
-      
-      client.post('favorites/create', tweetId, function (error, response) {
-        if (!error) {
-          
-          let username = response.user.screen_name;
-          let tweetIdString = response.id_str;
-
-          showFavoriteTweet(username,tweetIdString)
-          
-        } else {
-          console.log(error) 
-        }
-      })
-     
-    }
-
-    function showFavoriteTweet(username, tweetIdString){
-      return console.log('Favorited: ', `https://twitter.com/${username}/status/${tweetIdString}`)
-    }
-  }
-  
 }
+
+}
+
 
 function saveFileTodebug(data) {
   fs.writeFile("debug.txt", JSON.stringify(data), function(err) {
