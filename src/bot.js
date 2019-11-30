@@ -4,24 +4,29 @@ const fs = require('fs');
 const client = new Twitter(config);
 
 
-const frequencyLikeInMinutes = 60 //30minutes
+const frequencyLikeInMinutes = 30 //30minutes
+let likes = 0;
 
 setInterval(likeBot, 1000 * 60 * frequencyLikeInMinutes);
 
 function getParams() {
   const params = {
-    q: '(%23100DaysOfCode)%20-filter%3Areplies',
+    q: '-RT%20-free%20-coupons%20-coupon%20(%23100DaysOfCode)', //-RT -free -coupons -coupon (#100DaysOfCode)
     result_type: 'recent',
-    count: 100
+    count: 100,
+    lang: 'en'
   }
   return params
 }
 
 likeBot();
 
+
 function likeBot() {
   
+
   console.log('--- Bot started --- \n')
+  console.log(`--- Likes count:  ${likes} --- \n`)
 
   verifyRateLimit()
 
@@ -32,6 +37,8 @@ function likeBot() {
       if(!error) {
       
         const remaining = data.resources.search['/search/tweets'].remaining;
+
+        console.log(`--- Limit remaining ${remaining} ---\n`)
 
         if(remaining > 10) {
 
@@ -55,6 +62,8 @@ function likeBot() {
 
         const sanitizedTweets = filtersTheGoodOnes(tweets)
 
+        // debug('sanitizedTweets', sanitizedTweets)
+        
         sanitizedTweets ? tryToFavorite(sanitizedTweets) : console.log("no good tweet found 😢")
 
       } else {
@@ -69,14 +78,13 @@ function likeBot() {
     
     const arrayOfTweets = Array.from(tweets)
 
-    const containsRestrictedWords = /^((?!free|coupons|coupon).)*$/gim;
-    
     const containsDay = /(day\d{1,2})|(day \d{1,2})|(D \d{1,2})|(D-\d{1,2})|(day-\d{1,2})|(\d{1,2}\/100+)/gim
 
     const sanitizedTweets = arrayOfTweets.filter((tweet) => {
-      
+
+      // debug('filtersTheGoodOnes', tweet)
+
       return  !tweet.retweeted_status && 
-              !containsRestrictedWords.test(tweet.text) && 
               containsDay.test(tweet.text) && 
               tweet.entities.hashtags.length <= 5 
     })
@@ -85,6 +93,8 @@ function likeBot() {
   }
 
   function tryToFavorite(tweets) {
+    
+    likes += tweets.length
 
     for (let i = 0; i < tweets.length; i++) {
 
@@ -112,6 +122,22 @@ function likeBot() {
 
 }
 
+
+function debug(type, data) {
+
+  if(type === 'sanitizedTweets') {
+    const arrayOfTweets = Array.from(data)
+    console.log(' \n\n\n sanitizedTweets  \n\n\n ')
+    arrayOfTweets.forEach((item) => {
+      console.log('--------------------------------------- \n' + item.text + '\n')
+    })
+  }
+  
+  else if(type === 'filtersTheGoodOnes') {
+     console.log( '--------------------------------------- \n' +  data.text + '\n\n\n')
+
+  }
+}
 
 function saveFileTodebug(data) {
   fs.writeFile("debug.txt", JSON.stringify(data), function(err) {
