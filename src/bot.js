@@ -4,7 +4,7 @@ const fs = require('fs');
 const client = new Twitter(config);
 
 
-const frequencyLikeInMinutes = 30 //30minutes
+const frequencyLikeInMinutes = 10 //30minutes
 let likes = 0;
 
 setInterval(likeBot, 1000 * 60 * frequencyLikeInMinutes);
@@ -13,7 +13,7 @@ function getParams() {
   const params = {
     q: '-RT%20-free%20-coupons%20-coupon%20(%23100DaysOfCode)', //-RT -free -coupons -coupon (#100DaysOfCode)
     result_type: 'recent',
-    count: 100,
+    count: 15,
     lang: 'en'
   }
   return params
